@@ -76,6 +76,12 @@ if (NOT BLT_LOADED)
   include(${BLT_SOURCE_DIR}/SetupBLT.cmake)
 endif()
 
+# Explicit MSVC detection fix for BLT
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(COMPILER_FAMILY_IS_MSVC 1)
+    message(STATUS "Force setting MSVC compiler family for BLT")
+endif()
+
 #######################################
 # Options that depend on BLT Options
 #######################################
