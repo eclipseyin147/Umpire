@@ -73,13 +73,14 @@ if (NOT BLT_LOADED)
   endif ()
 
   message(STATUS "BLT Source Directory: ${BLT_SOURCE_DIR}")
-  include(${BLT_SOURCE_DIR}/SetupBLT.cmake)
-endif()
 
-# Explicit MSVC detection fix for BLT
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(COMPILER_FAMILY_IS_MSVC 1)
-    message(STATUS "Force setting MSVC compiler family for BLT")
+  # Explicit MSVC detection fix for BLT
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+      set(COMPILER_FAMILY_IS_MSVC 1)
+      message(STATUS "Force setting MSVC compiler family for BLT")
+  endif()
+
+  include(${BLT_SOURCE_DIR}/SetupBLT.cmake)
 endif()
 
 #######################################
