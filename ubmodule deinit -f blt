@@ -1,0 +1,3 @@
+[33m68054580[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mshonFlow[m[33m)[m Fix MSVC compiler detection for BLT to avoid -Wall -Wextra errors
+[33mab0ef154[m[33m ([m[1;31morigin/shonFlow[m[33m)[m Add fmt source code as regular directory
+[33md58f31a7[m first commit
