@@ -396,6 +396,7 @@ elseif (FMT_UNICODE)
   # Unicode support requires compiling with /utf-8.
   target_compile_options(fmt PUBLIC $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
   target_compile_options(fmt-header-only INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
+  message("FMT set by me *******************")
 else ()
   target_compile_definitions(fmt PUBLIC FMT_UNICODE=0)
 endif ()
