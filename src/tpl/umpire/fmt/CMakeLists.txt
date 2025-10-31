@@ -360,22 +360,31 @@ if (FMT_SAFE_DURATION_CAST)
 endif ()
 
 
-# Force UTF-8 on Windows (MSVC). Place after fmt targets are defined.
-if(MSVC)
-  # Host C++ sources
-  target_compile_options(fmt PUBLIC $<$<COMPILE_LANGUAGE:CXX>:/utf-8 /EHsc>)
-  target_compile_options(fmt-header-only INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/utf-8 /EHsc>)
 
-  # CUDA sources: forward to host via -Xcompiler (no bare /utf-8 to NVCC)
-  if(CMAKE_CUDA_COMPILER)
-    target_compile_options(fmt PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=/utf-8 -Xcompiler=/EHsc>)
-    target_compile_options(fmt-header-only INTERFACE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=/utf-8 -Xcompiler=/EHsc>)
-  endif()
-endif()
 
 
 add_library(fmt-header-only INTERFACE)
 add_library(fmt::fmt-header-only ALIAS fmt-header-only)
+
+# Force UTF-8 on Windows (MSVC)
+if(MSVC)
+  if(TARGET fmt)
+    # Host C++ sources
+    target_compile_options(fmt PUBLIC $<$<COMPILE_LANGUAGE:CXX>:/utf-8 /EHsc>)
+    # CUDA sources: forward to host via -Xcompiler
+    if(CMAKE_CUDA_COMPILER)
+      target_compile_options(fmt PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=/utf-8 -Xcompiler=/EHsc>)
+    endif()
+  endif()
+
+  if(TARGET fmt-header-only)
+    target_compile_options(fmt-header-only INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/utf-8 /EHsc>)
+    if(CMAKE_CUDA_COMPILER)
+      target_compile_options(fmt-header-only INTERFACE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=/utf-8 -Xcompiler=/EHsc>)
+    endif()
+  endif()
+endif()
+
 
 if (NOT MSVC)
   # Unicode is always supported on compilers other than MSVC.
