@@ -21,6 +21,10 @@ cmake_minimum_required(VERSION 3.23)
 
 set(UMPIRE_VERSION_RC "")
 
+
+add_compile_options(-Xcompiler=/utf-8)
+
+
 include(cmake/SetupUmpireOptions.cmake)
 
 set(BLT_CXX_STD "c++17" CACHE STRING "Version of C++ standard")
