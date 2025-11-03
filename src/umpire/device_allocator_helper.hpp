@@ -81,8 +81,9 @@ __host__ void destroy_device_allocator();
       cudaError_t err = cudaMemcpyToSymbol(umpire::UMPIRE_DEV_ALLOCS, &umpire::UMPIRE_DEV_ALLOCS_h,     \
                                            sizeof(umpire::DeviceAllocator*));                           \
       if (err != cudaSuccess) {                                                                         \
-        UMPIRE_ERROR(umpire::runtime_error,                                                             \
-                     fmt::format("cudaMemcpyToSymbol failed with error: {}", cudaGetErrorString(err))); \
+        std::ostringstream oss;                                                                         \
+        oss << "cudaMemcpyToSymbol failed with error: " << cudaGetErrorString(err);                     \
+        UMPIRE_ERROR(umpire::runtime_error, oss.str());                                                 \
       }                                                                                                 \
     }                                                                                                   \
     umpire::macro_tracking = 1;                                                                         \
@@ -95,8 +96,9 @@ __host__ void destroy_device_allocator();
       hipError_t err = hipMemcpyToSymbol(umpire::UMPIRE_DEV_ALLOCS, &umpire::UMPIRE_DEV_ALLOCS_h,     \
                                          sizeof(umpire::DeviceAllocator*));                           \
       if (err != hipSuccess) {                                                                        \
-        UMPIRE_ERROR(umpire::runtime_error,                                                           \
-                     fmt::format("hipMemcpyToSymbol failed with error: {}", hipGetErrorString(err))); \
+        std::ostringstream oss;                                                                        \
+        oss << "hipMemcpyToSymbol failed with error: " << hipGetErrorString(err);                      \
+        UMPIRE_ERROR(umpire::runtime_error, oss.str());                                                \
       }                                                                                               \
     }                                                                                                 \
     umpire::macro_tracking = 1;                                                                       \
