@@ -7,6 +7,8 @@
 #ifndef UMPIRE_HipMallocManagedAllocator_HPP
 #define UMPIRE_HipMallocManagedAllocator_HPP
 
+#include <sstream>
+
 #include "hip/hip_runtime_api.h"
 #include "umpire/alloc/HipAllocator.hpp"
 #include "umpire/config.hpp"
@@ -41,11 +43,13 @@ struct HipMallocManagedAllocator : HipAllocator {
     UMPIRE_LOG(Debug, "(bytes=" << bytes << ") returning " << ptr);
     if (error != hipSuccess) {
       if (error == hipErrorMemoryAllocation) {
-        UMPIRE_ERROR(out_of_memory_error, fmt::format("hipMallocManaged( bytes = {} ) failed with error: {}", bytes,
-                                                      hipGetErrorString(error)));
+        std::ostringstream oss;
+        oss << "hipMallocManaged( bytes = " << bytes << " ) failed with error: " << hipGetErrorString(error);
+        UMPIRE_ERROR(out_of_memory_error, oss.str());
       } else {
-        UMPIRE_ERROR(runtime_error, fmt::format("hipMallocManaged( bytes = {} ) failed with error: {}", bytes,
-                                                hipGetErrorString(error)));
+        std::ostringstream oss;
+        oss << "hipMallocManaged( bytes = " << bytes << " ) failed with error: " << hipGetErrorString(error);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
 
@@ -55,16 +59,18 @@ struct HipMallocManagedAllocator : HipAllocator {
 
       hipError_t error = ::hipGetDevice(&device);
       if (error != hipSuccess) {
-        UMPIRE_ERROR(runtime_error, fmt::format("hipGetDevice failed with error: {}", hipGetErrorString(error)));
+        std::ostringstream oss;
+        oss << "hipGetDevice failed with error: " << hipGetErrorString(error);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
 
       UMPIRE_LOG(Debug, "::hipMemAdvise(hipMemAdviseSetCoarseGrain)");
       error = ::hipMemAdvise(ptr, bytes, hipMemAdviseSetCoarseGrain, device);
 
       if (error != hipSuccess) {
-        UMPIRE_ERROR(runtime_error,
-                     fmt::format("hipMemAdvise( src_ptr = {}, length = {}, device = {}) failed with error: {}", ptr,
-                                 bytes, device, hipGetErrorString(error)));
+        std::ostringstream oss;
+        oss << "hipMemAdvise( src_ptr = " << ptr << ", length = " << bytes << ", device = " << device << ") failed with error: " << hipGetErrorString(error);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
 #endif // UMPIRE_ENABLE_HIP_COHERENCE_GRANULARITY
@@ -85,8 +91,9 @@ struct HipMallocManagedAllocator : HipAllocator {
 
     hipError_t error = ::hipFree(ptr);
     if (error != hipSuccess) {
-      UMPIRE_ERROR(runtime_error,
-                   fmt::format("hipFree( ptr = {} ) failed with error: {}", ptr, hipGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "hipFree( ptr = " << ptr << " ) failed with error: " << hipGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 

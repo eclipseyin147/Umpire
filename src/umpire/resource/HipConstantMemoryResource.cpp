@@ -33,7 +33,9 @@ void* HipConstantMemoryResource::allocate(std::size_t bytes)
     hipError_t error = hipGetSymbolAddress((void**)&m_ptr, s_umpire_internal_device_constant_memory);
 
     if (error != hipSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("hipGetSymbolAddress failed with error: {}", hipGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "hipGetSymbolAddress failed with error: " << hipGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
 
     m_initialized = true;
@@ -45,8 +47,9 @@ void* HipConstantMemoryResource::allocate(std::size_t bytes)
   void* ret{static_cast<void*>(ptr)};
 
   if (m_offset > MAX_CONST_MEM_SIZE) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Max total size of constant allocations is 64KB, current size is {} bytes",
-                                            (m_offset - bytes)));
+    std::ostringstream oss;
+    oss << "Max total size of constant allocations is 64KB, current size is " << (m_offset - bytes) << " bytes";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   UMPIRE_LOG(Debug, "(bytes=" << bytes << ") returning " << ret);

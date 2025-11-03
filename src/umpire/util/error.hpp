@@ -9,8 +9,6 @@
 
 #include <stdexcept>
 #include <string>
-
-#include "fmt/format.h"
 #include "umpire/util/Macros.hpp"
 
 namespace umpire {

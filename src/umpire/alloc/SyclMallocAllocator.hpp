@@ -7,6 +7,8 @@
 #ifndef UMPIRE_SyclMallocAllocator_HPP
 #define UMPIRE_SyclMallocAllocator_HPP
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
 #include "umpire/util/sycl_compat.hpp"
@@ -35,7 +37,9 @@ struct SyclMallocAllocator {
     UMPIRE_LOG(Debug, "(bytes=" << size << ") returning " << ptr);
 
     if (ptr == nullptr) {
-      UMPIRE_ERROR(runtime_error, fmt::format("sycl::malloc_device( bytes = {} ) failed", size));
+      std::ostringstream oss;
+      oss << "sycl::malloc_device( bytes = " << size << " ) failed";
+      UMPIRE_ERROR(runtime_error, oss.str());
     } else {
       return ptr;
     }

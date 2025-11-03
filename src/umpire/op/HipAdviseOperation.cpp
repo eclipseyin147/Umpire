@@ -7,6 +7,8 @@
 
 #include "umpire/op/HipAdviseOperation.hpp"
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
 
@@ -24,9 +26,10 @@ void HipAdviseOperation::apply(void* src_ptr, util::AllocationRecord* UMPIRE_UNU
   auto error = ::hipMemAdvise(src_ptr, length, m_advise, device);
 
   if (error != hipSuccess) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("hipMemAdvise( src_ptr = {}, length = {}, device = {}) failed with error: {}", src_ptr,
-                             length, device, hipGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "hipMemAdvise( src_ptr = " << src_ptr << ", length = " << length
+        << ", device = " << device << ") failed with error: " << hipGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 }
 

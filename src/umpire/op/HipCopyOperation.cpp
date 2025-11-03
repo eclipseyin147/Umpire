@@ -8,6 +8,8 @@
 
 #include <hip/hip_runtime.h>
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/Platform.hpp"
 #include "umpire/util/error.hpp"
@@ -26,9 +28,10 @@ void HipCopyOperation::transform(void* src_ptr, void** dst_ptr,
   hipError_t error = ::hipMemcpy(*dst_ptr, src_ptr, length, m_kind);
 
   if (error != hipSuccess) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("hipMemcpy( dest_ptr = {}, src_ptr = {}, length = {}) failed with error: {}", *dst_ptr,
-                             src_ptr, length, hipGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "hipMemcpy( dest_ptr = " << *dst_ptr << ", src_ptr = " << src_ptr
+        << ", length = " << length << ") failed with error: " << hipGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 }
 
@@ -38,17 +41,20 @@ camp::resources::EventProxy<camp::resources::Resource> HipCopyOperation::transfo
 {
   auto device = ctx.try_get<camp::resources::Hip>();
   if (!device) {
-    UMPIRE_ERROR(resource_error,
-                 fmt::format("Expected resources::Hip, got resources::{}", platform_to_string(ctx.get_platform())));
+    std::ostringstream oss;
+    oss << "Expected resources::Hip, got resources::" << platform_to_string(ctx.get_platform());
+    UMPIRE_ERROR(resource_error, oss.str());
   }
   auto stream = device->get_stream();
 
   hipError_t error = ::hipMemcpyAsync(*dst_ptr, src_ptr, length, m_kind, stream);
 
   if (error != hipSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("hipMemcpyAsync( dest_ptr = {}, src_ptr = {}, length = {}, "
-                                            "stream = {}) failed with error: {}",
-                                            *dst_ptr, src_ptr, length, (void*)stream, hipGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "hipMemcpyAsync( dest_ptr = " << *dst_ptr << ", src_ptr = " << src_ptr
+        << ", length = " << length << ", stream = " << (void*)stream
+        << ") failed with error: " << hipGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   return camp::resources::EventProxy<camp::resources::Resource>{ctx};

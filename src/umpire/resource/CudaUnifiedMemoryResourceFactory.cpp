@@ -8,6 +8,8 @@
 
 #include <cuda_runtime_api.h>
 
+#include <sstream>
+
 #include "umpire/alloc/CudaMallocManagedAllocator.hpp"
 #include "umpire/resource/DefaultMemoryResource.hpp"
 #include "umpire/util/error.hpp"
@@ -45,8 +47,9 @@ MemoryResourceTraits CudaUnifiedMemoryResourceFactory::getDefaultTraits()
   auto error = ::cudaGetDeviceProperties(&properties, 0);
 
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("cudaGetDeviceProperties failed with error: {}", cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaGetDeviceProperties failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   traits.unified = true;

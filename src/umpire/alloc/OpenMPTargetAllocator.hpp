@@ -7,6 +7,8 @@
 #ifndef UMPIRE_OpenMPTargetAllocator_HPP
 #define UMPIRE_OpenMPTargetAllocator_HPP
 
+#include <sstream>
+
 #include "omp.h"
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/Platform.hpp"
@@ -36,7 +38,9 @@ struct OpenMPTargetAllocator {
     UMPIRE_LOG(Debug, "(bytes=" << bytes << ") returning " << ret);
 
     if (ret == nullptr) {
-      UMPIRE_ERROR(runtime_error, fmt::format("omp_target_alloc( bytes = {}, device = {} ) failed. ", bytes, device));
+      std::ostringstream oss;
+      oss << "omp_target_alloc( bytes = " << bytes << ", device = " << device << " ) failed. ";
+      UMPIRE_ERROR(runtime_error, oss.str());
     } else {
       return ret;
     }

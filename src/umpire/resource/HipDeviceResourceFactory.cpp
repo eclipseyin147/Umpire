@@ -7,6 +7,7 @@
 #include "umpire/resource/HipDeviceResourceFactory.hpp"
 
 #include "hip/hip_runtime_api.h"
+#include <sstream>
 #include "umpire/resource/HipDeviceMemoryResource.hpp"
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/make_unique.hpp"
@@ -42,7 +43,9 @@ MemoryResourceTraits HipDeviceResourceFactory::getDefaultTraits()
   auto error = ::hipGetDeviceProperties(&properties, 0);
 
   if (error != hipSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("hipGetDeviceProperties failed with error: {}", hipGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "hipGetDeviceProperties failed with error: " << hipGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   traits.unified = false;

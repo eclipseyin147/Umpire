@@ -9,6 +9,8 @@
 
 #include <cuda_runtime_api.h>
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
 
@@ -34,12 +36,12 @@ struct CudaMallocAllocator {
     cudaError_t error = ::cudaMalloc(&ptr, size);
     UMPIRE_LOG(Debug, "(bytes=" << size << ") returning " << ptr);
     if (error != cudaSuccess) {
+      std::ostringstream oss;
+      oss << "cudaMalloc( bytes = " << size << " ) failed with error: " << cudaGetErrorString(error);
       if (error == cudaErrorMemoryAllocation) {
-        UMPIRE_ERROR(out_of_memory_error,
-                     fmt::format("cudaMalloc( bytes = {} ) failed with error: {}", size, cudaGetErrorString(error)));
+        UMPIRE_ERROR(out_of_memory_error, oss.str());
       } else {
-        UMPIRE_ERROR(runtime_error,
-                     fmt::format("cudaMalloc( bytes = {} ) failed with error: {}", size, cudaGetErrorString(error)));
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
 
@@ -58,8 +60,9 @@ struct CudaMallocAllocator {
     UMPIRE_LOG(Debug, "(ptr=" << ptr << ")");
     cudaError_t error = ::cudaFree(ptr);
     if (error != cudaSuccess) {
-      UMPIRE_ERROR(runtime_error,
-                   fmt::format("cudaFree( ptr = {} ) failed with error: {}", ptr, cudaGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "cudaFree( ptr = " << ptr << " ) failed with error: " << cudaGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 };

@@ -8,6 +8,8 @@
 
 #include <cstdlib>
 
+#include <sstream>
+
 #include "umpire/ResourceManager.hpp"
 #include "umpire/strategy/mixins/Inspector.hpp"
 #include "umpire/util/error.hpp"
@@ -36,8 +38,10 @@ void HostReallocateOperation::transform(void* current_ptr, void** new_ptr, util:
     *new_ptr = ::realloc(current_ptr, new_size);
 
     if (!*new_ptr) {
-      UMPIRE_ERROR(runtime_error, fmt::format("::realloc(current_ptr={}, old_size={}, new_size={}) failed.",
-                                              current_ptr, old_record.size, new_size));
+      std::ostringstream oss;
+      oss << "::realloc(current_ptr=" << current_ptr << ", old_size=" << old_record.size
+          << ", new_size=" << new_size << ") failed.";
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
 
     ResourceManager::getInstance().registerAllocation(*new_ptr, {*new_ptr, new_size, new_allocation->strategy});

@@ -8,7 +8,7 @@
 
 #include "umpire/ResourceManager.hpp"
 #include "umpire/util/Macros.hpp"
-
+#include <sstream>
 namespace umpire {
 
 namespace strategy {
@@ -34,8 +34,10 @@ void* MonotonicAllocationStrategy::allocate(std::size_t bytes)
   m_size += bytes;
 
   if (m_size > m_capacity) {
+    std::ostringstream oss;
+    oss << "MonotonicAllocationStrategy capacity exceeded {} > {}" << m_size<<  m_capacity;
     UMPIRE_ERROR(runtime_error,
-                 fmt::format("MonotonicAllocationStrategy capacity exceeded {} > {}", m_size, m_capacity));
+                 oss.str());
   }
 
   UMPIRE_LOG(Debug, "(bytes=" << bytes << ") returning " << ret);

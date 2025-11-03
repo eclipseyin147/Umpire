@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sstream>
 #include <unistd.h>
 
 #include "umpire/util/Platform.hpp"
@@ -64,7 +65,9 @@ void* FileMemoryResource::allocate(std::size_t bytes)
 
   int fd{open(ss.str().c_str(), O_RDWR | O_CREAT | O_LARGEFILE, S_IRWXU)};
   if (fd == -1) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Opening file {} failed: {}", ss.str(), strerror(errno)));
+    std::ostringstream oss;
+    oss << "Opening file " << ss.str() << " failed: " << strerror(errno);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   // Setting Size Of Map File
@@ -76,7 +79,9 @@ void* FileMemoryResource::allocate(std::size_t bytes)
   if (trun == -1) {
     int errno_save = errno;
     remove(ss.str().c_str());
-    UMPIRE_ERROR(runtime_error, fmt::format("truncate64 of file {} failed: {}", ss.str(), strerror(errno_save)));
+    std::ostringstream oss;
+    oss << "truncate64 of file " << ss.str() << " failed: " << strerror(errno_save);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
 #if defined(UMPIRE_ENABLE_UMAP) // Using mmap
@@ -87,8 +92,9 @@ void* FileMemoryResource::allocate(std::size_t bytes)
   if (ptr == MAP_FAILED) {
     int errno_save = errno;
     remove(ss.str().c_str());
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("mmap of {} to file {} failed: {}", rounded_bytes, ss.str(), strerror(errno_save)));
+    std::ostringstream oss;
+    oss << "mmap of " << rounded_bytes << " to file " << ss.str() << " failed: " << strerror(errno_save);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   // Storing Information On File
@@ -114,8 +120,9 @@ void FileMemoryResource::deallocate(void* ptr, std::size_t UMPIRE_UNUSED_ARG(siz
 #else
   if (munmap(iter->first, iter->second->second) < 0) {
 #endif
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("munmap of file {} failed: {}", iter->second->first.c_str(), strerror(errno)));
+    std::ostringstream oss;
+    oss << "munmap of file " << iter->second->first.c_str() << " failed: " << strerror(errno);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
 #if defined(UMPIRE_ENABLE_UMAP) // close fd
@@ -124,8 +131,9 @@ void FileMemoryResource::deallocate(void* ptr, std::size_t UMPIRE_UNUSED_ARG(siz
 #endif
   // Remove File
   if (remove(iter->second->first.c_str()) < 0) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("remove of file {} failed: {}", iter->second->first.c_str(), strerror(errno)));
+    std::ostringstream oss;
+    oss << "remove of file " << iter->second->first.c_str() << " failed: " << strerror(errno);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   // Remove Information about file in m_size_map
   m_size_map.erase(iter->first);

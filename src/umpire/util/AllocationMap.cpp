@@ -188,7 +188,9 @@ const AllocationRecord* AllocationMap::find(void* ptr) const
     // use this from a debugger to dump the contents of the AllocationMap
     printAll();
 #endif
-    UMPIRE_ERROR(unknown_pointer_error, fmt::format("Allocation not mapped: {}", ptr));
+    std::ostringstream oss;
+    oss << "Allocation not mapped: {}" << ptr;
+    UMPIRE_ERROR(unknown_pointer_error, oss.str());
   }
 }
 
@@ -252,7 +254,9 @@ AllocationRecord AllocationMap::remove(void* ptr)
     if (iter->second->empty())
       m_map.removeLast();
   } else {
-    UMPIRE_ERROR(runtime_error, fmt::format("Cannot remove {}", ptr));
+    std::ostringstream oss;
+    oss << "Cannot remove {}" << ptr;
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   --m_size;

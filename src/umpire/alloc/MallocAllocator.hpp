@@ -9,6 +9,7 @@
 
 #include <cerrno>
 #include <cstdlib>
+#include <sstream>
 
 #include "umpire/util/Platform.hpp"
 #include "umpire/util/error.hpp"
@@ -42,9 +43,13 @@ struct MallocAllocator {
 
     if (ret == nullptr) {
       if (errno == ENOMEM) {
-        UMPIRE_ERROR(out_of_memory_error, fmt::format("malloc( bytes = {} ) failed.", bytes))
+        std::ostringstream oss;
+        oss << "malloc( bytes = " << bytes << " ) failed.";
+        UMPIRE_ERROR(out_of_memory_error, oss.str());
       } else {
-        UMPIRE_ERROR(runtime_error, fmt::format("malloc( bytes = {} ) failed {}", bytes, strerror(errno)))
+        std::ostringstream oss;
+        oss << "malloc( bytes = " << bytes << " ) failed " << strerror(errno);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
 
@@ -71,18 +76,18 @@ struct MallocAllocator {
     int cdev = 0;
     cudaError_t err = cudaGetDevice(&cdev);
     if (err != cudaSuccess) {
-      UMPIRE_ERROR(umpire::runtime_error, fmt::format("cudaGetDevice failed with error: {}", cudaGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "cudaGetDevice failed with error: " << cudaGetErrorString(err);
+      UMPIRE_ERROR(umpire::runtime_error, oss.str());
     }
 
     // Device supports coherently accessing pageable memory
     // without calling cudaHostRegister on it
     err = cudaDeviceGetAttribute(&pageableMem, cudaDevAttrPageableMemoryAccess, cdev);
     if (err != cudaSuccess) {
-      UMPIRE_ERROR(
-          runtime_error,
-          fmt::format("cudaDeviceGetAttribute(pageableMem = {}, cudaDevAttrPageableMemoryAccess = {}, cdev = "
-                      "{}) failed with error: {}",
-                      pageableMem, static_cast<int>(cudaDevAttrPageableMemoryAccess), cdev, cudaGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "cudaDeviceGetAttribute(pageableMem = " << pageableMem << ", cudaDevAttrPageableMemoryAccess = " << static_cast<int>(cudaDevAttrPageableMemoryAccess) << ", cdev = " << cdev << ") failed with error: " << cudaGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
     if (pageableMem)
       return true;

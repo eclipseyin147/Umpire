@@ -7,6 +7,8 @@
 #ifndef UMPIRE_SyclMallocManagedAllocator_HPP
 #define UMPIRE_SyclMallocManagedAllocator_HPP
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
 #include "umpire/util/sycl_compat.hpp"
@@ -35,7 +37,9 @@ struct SyclMallocManagedAllocator {
     UMPIRE_LOG(Debug, "(bytes=" << bytes << ") returning " << usm_ptr);
 
     if (usm_ptr == nullptr) {
-      UMPIRE_ERROR(runtime_error, fmt::format("sycl::malloc_shared( bytes = {} ) failed", bytes));
+      std::ostringstream oss;
+      oss << "sycl::malloc_shared( bytes = " << bytes << " ) failed";
+      UMPIRE_ERROR(runtime_error, oss.str());
     } else {
       return usm_ptr;
     }

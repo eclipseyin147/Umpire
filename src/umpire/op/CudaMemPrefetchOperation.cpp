@@ -8,6 +8,8 @@
 
 #include <cuda_runtime_api.h>
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/Platform.hpp"
 #include "umpire/util/error.hpp"
@@ -25,24 +27,28 @@ void CudaMemPrefetchOperation::apply(void* src_ptr, util::AllocationRecord* UMPI
   int current_device;
   error = cudaGetDevice(&current_device);
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("cudaGetDevice failed with error: {}", cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaGetDevice failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   int gpu = (device != cudaCpuDeviceId) ? device : current_device;
 
   cudaDeviceProp properties;
   error = ::cudaGetDeviceProperties(&properties, gpu);
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("cudaGetDeviceProperties( device = {} ) failed with error: {}", gpu,
-                                            cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaGetDeviceProperties( device = " << gpu << " ) failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   if (properties.managedMemory == 1 && properties.concurrentManagedAccess == 1) {
     error = ::cudaMemPrefetchAsync(src_ptr, length, device);
 
     if (error != cudaSuccess) {
-      UMPIRE_ERROR(runtime_error,
-                   fmt::format("cudaMemPrefetchAsync( src_ptr = {}, length = {}, device = {}) failed with error: {}",
-                               src_ptr, length, device, cudaGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "cudaMemPrefetchAsync( src_ptr = " << src_ptr << ", length = " << length
+          << ", device = " << device << ") failed with error: " << cudaGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 }
@@ -58,21 +64,25 @@ camp::resources::EventProxy<camp::resources::Resource> CudaMemPrefetchOperation:
   int current_device;
   error = cudaGetDevice(&current_device);
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("cudaGetDevice failed with error: {}", cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaGetDevice failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   int gpu = (device != cudaCpuDeviceId) ? device : current_device;
 
   cudaDeviceProp properties;
   error = ::cudaGetDeviceProperties(&properties, gpu);
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("cudaGetDeviceProperties( device = {} ) failed with error: {}", gpu,
-                                            cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaGetDeviceProperties( device = " << gpu << " ) failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   auto resource = ctx.try_get<camp::resources::Cuda>();
   if (!resource) {
-    UMPIRE_ERROR(resource_error,
-                 fmt::format("Expected resources::Cuda, got resources::{}", platform_to_string(ctx.get_platform())));
+    std::ostringstream oss;
+    oss << "Expected resources::Cuda, got resources::" << platform_to_string(ctx.get_platform());
+    UMPIRE_ERROR(resource_error, oss.str());
   }
   auto stream = resource->get_stream();
 
@@ -80,11 +90,11 @@ camp::resources::EventProxy<camp::resources::Resource> CudaMemPrefetchOperation:
     error = ::cudaMemPrefetchAsync(src_ptr, length, device, stream);
 
     if (error != cudaSuccess) {
-      UMPIRE_ERROR(
-          runtime_error,
-          fmt::format(
-              "cudaMemPrefetchAsync( src_ptr = {}, length = {}, device = {}, stream = {}) failed with error: {}",
-              src_ptr, length, device, (void*)stream, cudaGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "cudaMemPrefetchAsync( src_ptr = " << src_ptr << ", length = " << length
+          << ", device = " << device << ", stream = " << (void*)stream
+          << ") failed with error: " << cudaGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 

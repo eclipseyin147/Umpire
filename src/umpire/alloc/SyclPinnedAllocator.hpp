@@ -7,6 +7,8 @@
 #ifndef UMPIRE_SyclPinnedAllocator_HPP
 #define UMPIRE_SyclPinnedAllocator_HPP
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
 #include "umpire/util/sycl_compat.hpp"
@@ -35,7 +37,9 @@ struct SyclPinnedAllocator {
     UMPIRE_LOG(Debug, "(bytes=" << size << ") returning " << ptr);
 
     if (ptr == nullptr) {
-      UMPIRE_ERROR(runtime_error, fmt::format("sycl::malloc_host( bytes = {} ) failed", size));
+      std::ostringstream oss;
+      oss << "sycl::malloc_host( bytes = " << size << " ) failed";
+      UMPIRE_ERROR(runtime_error, oss.str());
     } else {
       return ptr;
     }

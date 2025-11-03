@@ -7,6 +7,7 @@
 #ifndef UMPIRE_PosixMemalignAllocator_HPP
 #define UMPIRE_PosixMemalignAllocator_HPP
 
+#include <sstream>
 #include <stdlib.h>
 
 #include <cerrno>
@@ -39,12 +40,13 @@ struct PosixMemalignAllocator {
 
     if (ret == nullptr) {
       if (err == ENOMEM) {
-        UMPIRE_ERROR(out_of_memory_error,
-                     fmt::format("posix_memalign( bytes = {}, pagesize = {} ) failed with error = {}", bytes,
-                                 get_page_size(), strerror(err)));
+        std::ostringstream oss;
+        oss << "posix_memalign( bytes = " << bytes << ", pagesize = " << get_page_size() << " ) failed with error = " << strerror(err);
+        UMPIRE_ERROR(out_of_memory_error, oss.str());
       } else {
-        UMPIRE_ERROR(runtime_error, fmt::format("posix_memalign( bytes = {}, pagesize = {} ) failed with error = {}",
-                                                bytes, get_page_size(), strerror(err)));
+        std::ostringstream oss;
+        oss << "posix_memalign( bytes = " << bytes << ", pagesize = " << get_page_size() << " ) failed with error = " << strerror(err);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
 

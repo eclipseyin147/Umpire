@@ -7,6 +7,8 @@
 #ifndef UMPIRE_HipPinnedAllocator_HPP
 #define UMPIRE_HipPinnedAllocator_HPP
 
+#include <sstream>
+
 #include <hip/hip_runtime.h>
 
 #include "umpire/alloc/HipAllocator.hpp"
@@ -38,7 +40,11 @@ struct HipPinnedAllocator : HipAllocator {
         UMPIRE_LOG(Debug, "::hipHostMalloc(" << bytes << ", hipHostMallocDefault)");
         error = ::hipHostMalloc(&ptr, bytes, hipHostMallocDefault);
 #else
-        UMPIRE_ERROR(runtime_error, fmt::format("Fine grained memory coherence not supported for allocation"));
+        {
+          std::ostringstream oss;
+          oss << "Fine grained memory coherence not supported for allocation";
+          UMPIRE_ERROR(runtime_error, oss.str());
+        }
 #endif // UMPIRE_ENABLE_HIP_COHERENCE_GRANULARITY
         break;
 
@@ -47,7 +53,11 @@ struct HipPinnedAllocator : HipAllocator {
         UMPIRE_LOG(Debug, "::hipHostMalloc(" << bytes << ", hipHostMallocNonCoherent)");
         error = ::hipHostMalloc(&ptr, bytes, hipHostMallocNonCoherent);
 #else
-        UMPIRE_ERROR(runtime_error, fmt::format("Coarse grained memory coherence not supported for allocation"));
+        {
+          std::ostringstream oss;
+          oss << "Coarse grained memory coherence not supported for allocation";
+          UMPIRE_ERROR(runtime_error, oss.str());
+        }
 #endif // UMPIRE_ENABLE_HIP_COHERENCE_GRANULARITY
         break;
     }
@@ -55,11 +65,13 @@ struct HipPinnedAllocator : HipAllocator {
     UMPIRE_LOG(Debug, "(bytes=" << bytes << ") returning " << ptr);
     if (error != hipSuccess) {
       if (error == hipErrorMemoryAllocation) {
-        UMPIRE_ERROR(out_of_memory_error,
-                     fmt::format("hipHostMalloc( bytes = {} ) failed with error: {}", bytes, hipGetErrorString(error)));
+        std::ostringstream oss;
+        oss << "hipHostMalloc( bytes = " << bytes << " ) failed with error: " << hipGetErrorString(error);
+        UMPIRE_ERROR(out_of_memory_error, oss.str());
       } else {
-        UMPIRE_ERROR(runtime_error,
-                     fmt::format("hipHostMalloc( bytes = {} ) failed with error: {}", bytes, hipGetErrorString(error)));
+        std::ostringstream oss;
+        oss << "hipHostMalloc( bytes = " << bytes << " ) failed with error: " << hipGetErrorString(error);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
 
@@ -71,8 +83,9 @@ struct HipPinnedAllocator : HipAllocator {
     UMPIRE_LOG(Debug, "(ptr=" << ptr << ")");
     hipError_t error = ::hipHostFree(ptr);
     if (error != hipSuccess) {
-      UMPIRE_ERROR(runtime_error,
-                   fmt::format("hipHostFree( ptr = {} ) failed with error: {}", ptr, hipGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "hipHostFree( ptr = " << ptr << " ) failed with error: " << hipGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 

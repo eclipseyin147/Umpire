@@ -8,6 +8,8 @@
 
 #include <cuda_runtime_api.h>
 
+#include <sstream>
+
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/Platform.hpp"
 #include "umpire/util/error.hpp"
@@ -26,11 +28,11 @@ void CudaCopyOperation::transform(void* src_ptr, void** dst_ptr,
   cudaError_t error = ::cudaMemcpy(*dst_ptr, src_ptr, length, m_kind);
 
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(
-        runtime_error,
-        fmt::format(
-            "cudaMemcpy( dest_ptr = {}, src_ptr = {}, length = {}, cudaMemcpyDeviceToDevice) failed with error: {}",
-            *dst_ptr, src_ptr, length, cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaMemcpy( dest_ptr = " << *dst_ptr << ", src_ptr = " << src_ptr
+        << ", length = " << length << ", cudaMemcpyDeviceToDevice) failed with error: "
+        << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 }
 
@@ -40,17 +42,20 @@ camp::resources::EventProxy<camp::resources::Resource> CudaCopyOperation::transf
 {
   auto device = ctx.try_get<camp::resources::Cuda>();
   if (!device) {
-    UMPIRE_ERROR(resource_error,
-                 fmt::format("Expected resources::Cuda, got resources::{}", platform_to_string(ctx.get_platform())));
+    std::ostringstream oss;
+    oss << "Expected resources::Cuda, got resources::" << platform_to_string(ctx.get_platform());
+    UMPIRE_ERROR(resource_error, oss.str());
   }
   auto stream = device->get_stream();
 
   cudaError_t error = ::cudaMemcpyAsync(*dst_ptr, src_ptr, length, m_kind, stream);
 
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("cudaMemcpyAsync( dest_ptr = {}, src_ptr = {}, length = {}, "
-                                            "cudaMemcpyDeviceToDevice, stream = {}) failed with error: {}",
-                                            *dst_ptr, src_ptr, length, (void*)stream, cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaMemcpyAsync( dest_ptr = " << *dst_ptr << ", src_ptr = " << src_ptr
+        << ", length = " << length << ", cudaMemcpyDeviceToDevice, stream = "
+        << (void*)stream << ") failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   return camp::resources::EventProxy<camp::resources::Resource>{ctx};

@@ -9,6 +9,8 @@
 
 #include "umpire/op/CudaGetAttributeOperation.hpp"
 
+#include <sstream>
+
 #include "umpire/util/error.hpp"
 
 namespace umpire {
@@ -23,8 +25,9 @@ bool CudaGetAttributeOperation<ATTRIBUTE>::check_apply(void* src_ptr, umpire::ut
   error = ::cudaGetDeviceProperties(&properties, 0);
 
   if (error != cudaSuccess) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("cudaGetDeviceProperties( device = 0 ) failed with error: {}", cudaGetErrorString(error)));
+    std::ostringstream oss;
+    oss << "cudaGetDeviceProperties( device = 0 ) failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   if (properties.managedMemory == 1 && properties.concurrentManagedAccess == 1) {
@@ -33,9 +36,10 @@ bool CudaGetAttributeOperation<ATTRIBUTE>::check_apply(void* src_ptr, umpire::ut
     error = ::cudaMemRangeGetAttribute(&result, sizeof(result), ATTRIBUTE, src_ptr, length);
 
     if (error != cudaSuccess) {
-      UMPIRE_ERROR(runtime_error,
-                   fmt::format("cudaMemRangeGetAttribute( src_ptr = {}, length = {} ) failed with error: {}", src_ptr,
-                               length, cudaGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "cudaMemRangeGetAttribute( src_ptr = " << src_ptr << ", length = " << length
+          << " ) failed with error: " << cudaGetErrorString(error);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 }

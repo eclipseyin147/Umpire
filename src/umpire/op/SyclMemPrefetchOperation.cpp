@@ -6,6 +6,8 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "umpire/op/SyclMemPrefetchOperation.hpp"
 
+#include <sstream>
+
 #include "umpire/strategy/AllocationStrategy.hpp"
 #include "umpire/util/error.hpp"
 #include "umpire/util/sycl_compat.hpp"
@@ -16,7 +18,9 @@ namespace op {
 void SyclMemPrefetchOperation::apply(void* src_ptr, util::AllocationRecord* allocation, int value, std::size_t length)
 {
   if (allocation->strategy->getTraits().id != value) {
-    UMPIRE_ERROR(runtime_error, fmt::format("SYCL memPrefetch failed with invalid deviceID  = {} ", value));
+    std::ostringstream oss;
+    oss << "SYCL memPrefetch failed with invalid deviceID  = " << value << " ";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   auto sycl_queue = allocation->strategy->getTraits().queue;
@@ -28,7 +32,9 @@ void SyclMemPrefetchOperation::apply(void* src_ptr, util::AllocationRecord* allo
     sycl_queue->prefetch(src_ptr, length);
     sycl_queue->wait();
   } else {
-    UMPIRE_ERROR(runtime_error, fmt::format("SYCL memPrefetch failed ( bytes = {} )", length));
+    std::ostringstream oss;
+    oss << "SYCL memPrefetch failed ( bytes = " << length << " )";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 }
 

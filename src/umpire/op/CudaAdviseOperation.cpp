@@ -24,9 +24,10 @@ void CudaAdviseOperation::apply(void* src_ptr, util::AllocationRecord* UMPIRE_UN
   cudaError_t error = ::cudaMemAdvise(src_ptr, length, m_advice, device);
 
   if (error != cudaSuccess) {
+    std::ostringstream oss;
+    oss << "cudaMemAdvise( src_ptr = {}, length = {}, device = {}) failed with error: {}" << src_ptr<<  length<< device<<cudaGetErrorString(error);
     UMPIRE_ERROR(runtime_error,
-                 fmt::format("cudaMemAdvise( src_ptr = {}, length = {}, device = {}) failed with error: {}", src_ptr,
-                             length, device, cudaGetErrorString(error)));
+                 oss.str());
   }
 }
 
