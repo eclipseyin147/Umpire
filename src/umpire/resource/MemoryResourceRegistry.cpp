@@ -68,6 +68,7 @@
 
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
+#include <sstream>
 
 namespace umpire {
 namespace resource {
@@ -154,8 +155,9 @@ MemoryResourceRegistry::MemoryResourceRegistry() : m_allocator_factories()
     int device_count{0};
     error = ::hipGetDeviceCount(&device_count);
     if (error != hipSuccess) {
-      UMPIRE_ERROR(umpire::runtime_error,
-                   fmt::format("Error! Can't get HIP device count: {}", hipGetErrorString(error)));
+      std::ostringstream oss;
+      oss << "Error! Can't get HIP device count: " << hipGetErrorString(error);
+      UMPIRE_ERROR(umpire::runtime_error, oss.str());
     } else {
       registerMemoryResource(util::make_unique<resource::HipDeviceResourceFactory>());
       m_resource_names.push_back("DEVICE");
@@ -274,7 +276,7 @@ std::unique_ptr<resource::MemoryResource> MemoryResourceRegistry::makeMemoryReso
     }
   }
   std::ostringstream oss;
-  oss << "MemoryResource \"{}\" not found" << name;
+  oss << "MemoryResource \"" << name << "\" not found";
   UMPIRE_ERROR(runtime_error, oss.str());
 }
 
@@ -288,7 +290,7 @@ std::unique_ptr<resource::MemoryResource> MemoryResourceRegistry::makeMemoryReso
     }
   }
   std::ostringstream oss;
-  oss << "MemoryResource \"{}\" not found" << name;
+  oss << "MemoryResource \"" << name << "\" not found";
   UMPIRE_ERROR(runtime_error, oss.str());
 }
 
@@ -300,7 +302,7 @@ MemoryResourceTraits MemoryResourceRegistry::getDefaultTraitsForResource(const s
     }
   }
   std::ostringstream oss;
-  oss << "MemoryResource \"{}\" not found" << name;
+  oss << "MemoryResource \"" << name << "\" not found";
   UMPIRE_ERROR(runtime_error, oss.str());
 }
 

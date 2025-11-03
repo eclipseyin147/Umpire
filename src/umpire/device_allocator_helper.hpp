@@ -8,6 +8,7 @@
 #define UMPIRE_device_allocator_helper_HPP
 
 #include <string.h>
+#include <sstream>
 
 #include "umpire/DeviceAllocator.hpp"
 #include "umpire/util/error.hpp"

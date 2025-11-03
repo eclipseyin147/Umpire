@@ -11,10 +11,9 @@
 #include <stdlib.h>
 
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
-
-#include "fmt/format.h"
 #include "umpire/event/event_json.hpp"
 #include "umpire/json/json.hpp"
 #include "umpire/util/error.hpp"
@@ -121,8 +120,9 @@ std::vector<event> json_file_store::get_events()
       json_event = nlohmann::json::parse(line);
       e = json_event;
     } catch (...) {
-      UMPIRE_ERROR(umpire::runtime_error,
-                   fmt::format("json_file_store::get_events: Error parsing Line #{}", line_number));
+      std::ostringstream oss;
+      oss << "json_file_store::get_events: Error parsing Line #" << line_number;
+      UMPIRE_ERROR(umpire::runtime_error, oss.str());
     }
 
     events.push_back(e);
@@ -143,7 +143,9 @@ std::vector<event> json_file_store::get_events()
   f.open(m_filename, std::fstream::in);
 
   if (f.fail()) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("Failed to open {}", m_filename));
+    std::ostringstream oss;
+    oss << "Failed to open " << m_filename;
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   while (std::getline(f, line)) {
@@ -154,8 +156,9 @@ std::vector<event> json_file_store::get_events()
       json_event = nlohmann::json::parse(line);
       e = json_event;
     } catch (...) {
-      UMPIRE_ERROR(umpire::runtime_error,
-                   fmt::format("json_file_store::get_events: Error parsing Line #{}", line_number));
+      std::ostringstream oss;
+      oss << "json_file_store::get_events: Error parsing Line #" << line_number;
+      UMPIRE_ERROR(umpire::runtime_error, oss.str());
     }
 
     events.push_back(e);
@@ -173,7 +176,9 @@ void json_file_store::open_store()
     m_fstream = fopen(m_filename.c_str(), m_read_only ? "r" : "w");
 
     if (m_fstream == NULL) {
-      UMPIRE_ERROR(umpire::runtime_error, fmt::format("Failed to open {}", m_filename));
+      std::ostringstream oss;
+      oss << "Failed to open " << m_filename;
+      UMPIRE_ERROR(umpire::runtime_error, oss.str());
     }
   }
 }

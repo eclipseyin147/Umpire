@@ -11,6 +11,7 @@
 #include "umpire/strategy/mixins/AlignedAllocation.hpp"
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/memory_sanitizers.hpp"
+#include <sstream>
 
 namespace umpire {
 namespace strategy {
@@ -361,8 +362,10 @@ PoolCoalesceHeuristic<QuickPool> QuickPool::blocks_releasable_hwm(std::size_t nb
 PoolCoalesceHeuristic<QuickPool> QuickPool::percent_releasable(int percentage)
 {
   if (percentage < 0 || percentage > 100) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("Invalid percentage: {}, percentage must be an integer between 0 and 100", percentage));
+    std::ostringstream oss;
+    oss << "Invalid percentage: " << percentage
+        << ", percentage must be an integer between 0 and 100";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   if (percentage == 0) {
     return [=](const QuickPool& UMPIRE_UNUSED_ARG(pool)) { return 0; };
@@ -383,8 +386,10 @@ PoolCoalesceHeuristic<QuickPool> QuickPool::percent_releasable(int percentage)
 PoolCoalesceHeuristic<QuickPool> QuickPool::percent_releasable_hwm(int percentage)
 {
   if (percentage < 0 || percentage > 100) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("Invalid percentage: {}, percentage must be an integer between 0 and 100", percentage));
+    std::ostringstream oss;
+    oss << "Invalid percentage: " << percentage
+        << ", percentage must be an integer between 0 and 100";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   if (percentage == 0) {
     return [=](const QuickPool& UMPIRE_UNUSED_ARG(pool)) { return 0; };

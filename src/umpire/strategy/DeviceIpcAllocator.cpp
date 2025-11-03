@@ -80,7 +80,9 @@ DeviceIpcAllocator::~DeviceIpcAllocator()
       try {
         m_device_allocator->deallocate_internal(item.first);
       } catch (const std::exception& e) {
-        UMPIRE_LOG(Warning, fmt::format("Exception during cleanup: {}", e.what()));
+        std::ostringstream oss;
+        oss << "Exception during cleanup: " << e.what();
+        UMPIRE_LOG(Warning, oss.str());
       }
     }
     m_allocation_names.clear();
@@ -94,35 +96,55 @@ void DeviceIpcAllocator::setup_shared_scope(MemoryResourceTraits::shared_scope s
   if (scope == MemoryResourceTraits::shared_scope::node) {
     MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &m_scope_comm);
     MPI_Comm_rank(m_scope_comm, &m_scope_rank);
-    UMPIRE_LOG(Debug, fmt::format("Node scope: rank {} in node communicator", m_scope_rank));
+    {
+      std::ostringstream oss;
+      oss << "Node scope: rank " << m_scope_rank << " in node communicator";
+      UMPIRE_LOG(Debug, oss.str());
+    }
   } else if (scope == MemoryResourceTraits::shared_scope::socket) {
     // Get current device
     int device_id;
     gpuError err = gpuGetDevice(&device_id);
     if (err != gpuSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("gpuGetDevice failed with error: {}", gpuGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "gpuGetDevice failed with error: " << gpuGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
 
     // Get device properties
     gpuDeviceProp props;
     err = gpuGetDeviceProperties(&props, device_id);
     if (err != gpuSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("gpuGetDeviceProperties failed with error: {}", gpuGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "gpuGetDeviceProperties failed with error: " << gpuGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
 
     // Use PCI domain, bus, and device as color for MPI communicator split
     m_scope_color = props.pciDomainID * 1000000 + props.pciBusID * 1000 + props.pciDeviceID;
 
-    UMPIRE_LOG(Debug, fmt::format("Socket scope: using color {} for PCI split", m_scope_color));
+    {
+      std::ostringstream oss;
+      oss << "Socket scope: using color " << m_scope_color << " for PCI split";
+      UMPIRE_LOG(Debug, oss.str());
+    }
     MPI_Comm_split(MPI_COMM_WORLD, m_scope_color, 0, &m_scope_comm);
     MPI_Comm_rank(m_scope_comm, &m_scope_rank);
-    UMPIRE_LOG(Debug, fmt::format("Socket scope: rank {} in socket communicator", m_scope_rank));
+    {
+      std::ostringstream oss;
+      oss << "Socket scope: rank " << m_scope_rank << " in socket communicator";
+      UMPIRE_LOG(Debug, oss.str());
+    }
   } else {
     UMPIRE_ERROR(runtime_error, "Unsupported scope for DeviceIpcAllocator");
   }
 
   m_is_scope_leader = (m_scope_rank == 0);
-  UMPIRE_LOG(Debug, fmt::format("Rank {} is {} leader", m_scope_rank, m_is_scope_leader ? "scope" : "not scope"));
+  {
+    std::ostringstream oss;
+    oss << "Rank " << m_scope_rank << " is " << (m_is_scope_leader ? "scope" : "not scope") << " leader";
+    UMPIRE_LOG(Debug, oss.str());
+  }
 }
 
 std::string DeviceIpcAllocator::generate_allocation_name(std::size_t size_in_bytes)
@@ -135,7 +157,11 @@ std::string DeviceIpcAllocator::generate_allocation_name(std::size_t size_in_byt
 
 void* DeviceIpcAllocator::allocate(std::size_t bytes)
 {
-  UMPIRE_LOG(Debug, fmt::format("(size_in_bytes={})", bytes));
+  {
+    std::ostringstream oss;
+    oss << "(size_in_bytes=" << bytes << ")";
+    UMPIRE_LOG(Debug, oss.str());
+  }
 
   std::string allocation_name = generate_allocation_name(bytes);
 
@@ -162,7 +188,11 @@ void* DeviceIpcAllocator::allocate(std::size_t bytes)
 void* DeviceIpcAllocator::create(const std::string& name, std::size_t size_in_bytes)
 {
   void* ptr = m_device_allocator->allocate_internal(size_in_bytes);
-  UMPIRE_LOG(Debug, fmt::format("Leader allocated device memory at {} (size: {})", ptr, size_in_bytes));
+  {
+    std::ostringstream oss;
+    oss << "Leader allocated device memory at " << ptr << " (size: " << size_in_bytes << ")";
+    UMPIRE_LOG(Debug, oss.str());
+  }
 
   IpcHandleInfo* handle_info = create_handle_info(name, size_in_bytes);
   if (!handle_info) {
@@ -174,20 +204,28 @@ void* DeviceIpcAllocator::create(const std::string& name, std::size_t size_in_by
   if (err != gpuSuccess) {
     m_device_allocator->deallocate_internal(ptr);
     m_shared_allocator->deallocate_internal(handle_info);
-    UMPIRE_ERROR(runtime_error, fmt::format("gpuIpcGetMemHandle failed with error: {}", gpuGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "gpuIpcGetMemHandle failed with error: " << gpuGetErrorString(err);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   // Setup handle info fields
   handle_info->size = size_in_bytes;
   err = gpuGetDevice(&handle_info->device_id);
   if (err != gpuSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("gpuGetDevice failed with error: {}", gpuGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "gpuGetDevice failed with error: " << gpuGetErrorString(err);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   handle_info->is_initialized.store(true, std::memory_order_release);
 
   // Signal followers that the handle is ready
   MPI_Barrier(m_scope_comm);
-  UMPIRE_LOG(Debug, fmt::format("Leader completed IPC setup for device memory at {}", ptr));
+  {
+    std::ostringstream oss;
+    oss << "Leader completed IPC setup for device memory at " << ptr;
+    UMPIRE_LOG(Debug, oss.str());
+  }
 
   return ptr;
 }
@@ -206,46 +244,70 @@ void* DeviceIpcAllocator::import(const std::string& name)
   int current_device, target_device = handle_info->device_id;
   gpuError err = gpuGetDevice(&current_device);
   if (err != gpuSuccess) {
-    UMPIRE_ERROR(runtime_error, fmt::format("gpuGetDevice failed with error: {}", gpuGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "gpuGetDevice failed with error: " << gpuGetErrorString(err);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   bool device_switched = false;
   if (current_device != target_device) {
     err = gpuSetDevice(target_device);
     if (err != gpuSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("gpuSetDevice failed with error: {}", gpuGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "gpuSetDevice failed with error: " << gpuGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
     device_switched = true;
   }
 
   void* ptr = nullptr;
   err = gpuIpcOpenMemHandle(&ptr, handle_info->handle, gpuIpcMemLazyEnablePeerAccess);
-  UMPIRE_LOG(Debug, fmt::format("Follower opened IPC handle to device memory at {}", ptr));
+  {
+    std::ostringstream oss;
+    oss << "Follower opened IPC handle to device memory at " << ptr;
+    UMPIRE_LOG(Debug, oss.str());
+  }
   if (err != gpuSuccess) {
     auto store_error_temp = gpuGetErrorString(err);
     if (device_switched) {
       err = gpuSetDevice(current_device);
       if (err != gpuSuccess) {
-        UMPIRE_ERROR(runtime_error, fmt::format("gpuSetDevice failed with error: {}", gpuGetErrorString(err)));
+        std::ostringstream oss;
+        oss << "gpuSetDevice failed with error: " << gpuGetErrorString(err);
+        UMPIRE_ERROR(runtime_error, oss.str());
       }
     }
-    UMPIRE_ERROR(runtime_error, fmt::format("gpuIpcOpenMemHandle failed with error: {}", store_error_temp));
+    {
+      std::ostringstream oss;
+      oss << "gpuIpcOpenMemHandle failed with error: " << store_error_temp;
+      UMPIRE_ERROR(runtime_error, oss.str());
+    }
     return nullptr;
   }
 
   if (device_switched) {
     err = gpuSetDevice(current_device);
     if (err != gpuSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("gpuSetDevice failed with error: {}", gpuGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "gpuSetDevice failed with error: " << gpuGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 
-  UMPIRE_LOG(Debug, fmt::format("Follower successfully imported device memory at {}", ptr));
+  {
+    std::ostringstream oss;
+    oss << "Follower successfully imported device memory at " << ptr;
+    UMPIRE_LOG(Debug, oss.str());
+  }
   return ptr;
 }
 
 void DeviceIpcAllocator::deallocate(void* ptr, std::size_t)
 {
-  UMPIRE_LOG(Debug, fmt::format("(ptr={})", ptr));
+  {
+    std::ostringstream oss;
+    oss << "(ptr=" << ptr << ")";
+    UMPIRE_LOG(Debug, oss.str());
+  }
 
   MPI_Barrier(m_scope_comm);
 
@@ -268,7 +330,9 @@ void DeviceIpcAllocator::deallocate(void* ptr, std::size_t)
   } else {
     gpuError err = gpuIpcCloseMemHandle(ptr);
     if (err != gpuSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("gpuIpcCloseMemHandle failed with error: {}", gpuGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "gpuIpcCloseMemHandle failed with error: " << gpuGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
   }
 }
@@ -276,7 +340,11 @@ void DeviceIpcAllocator::deallocate(void* ptr, std::size_t)
 DeviceIpcAllocator::IpcHandleInfo* DeviceIpcAllocator::get_handle_info(const std::string& name)
 {
   void* shared_ptr = m_shared_memory_resource->find_pointer_from_name(name);
-  UMPIRE_LOG(Debug, fmt::format("Found shared memory at {} for {}", shared_ptr, name));
+  {
+    std::ostringstream oss;
+    oss << "Found shared memory at " << shared_ptr << " for " << name;
+    UMPIRE_LOG(Debug, oss.str());
+  }
   return static_cast<IpcHandleInfo*>(shared_ptr);
 }
 
@@ -285,7 +353,11 @@ DeviceIpcAllocator::IpcHandleInfo* DeviceIpcAllocator::create_handle_info(const 
 {
   if (m_is_scope_leader) {
     void* shared_ptr = m_shared_memory_resource->allocate_named_internal(name, sizeof(IpcHandleInfo));
-    UMPIRE_LOG(Debug, fmt::format("Leader created shared memory at {} for {}", shared_ptr, name));
+    {
+      std::ostringstream oss;
+      oss << "Leader created shared memory at " << shared_ptr << " for " << name;
+      UMPIRE_LOG(Debug, oss.str());
+    }
 
     if (shared_ptr) {
       IpcHandleInfo* info = static_cast<IpcHandleInfo*>(shared_ptr);
@@ -316,3 +388,4 @@ MemoryResourceTraits DeviceIpcAllocator::getTraits() const noexcept
 
 } // end of namespace strategy
 } // end of namespace umpire
+

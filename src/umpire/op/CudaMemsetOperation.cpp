@@ -7,6 +7,7 @@
 #include "umpire/op/CudaMemsetOperation.hpp"
 
 #include <cuda_runtime_api.h>
+#include <sstream>
 
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/Platform.hpp"
@@ -22,7 +23,10 @@ void CudaMemsetOperation::apply(void* src_ptr, util::AllocationRecord* UMPIRE_UN
 
   if (error != cudaSuccess) {
     std::ostringstream oss;
-    oss << "cudaMemset( src_ptr = {}, val = {}, length = {}) failed with error: {}" <<  src_ptr<<value<< length<< cudaGetErrorString(error);
+    oss << "cudaMemset( src_ptr = " << src_ptr
+        << ", val = " << value
+        << ", length = " << length
+        << ") failed with error: " << cudaGetErrorString(error);
     UMPIRE_ERROR(runtime_error, oss.str());
   }
 }
@@ -34,9 +38,8 @@ camp::resources::EventProxy<camp::resources::Resource> CudaMemsetOperation::appl
   auto device = ctx.try_get<camp::resources::Cuda>();
   if (!device) {
     std::ostringstream oss;
-    oss << "Expected resources::Cuda, got resources::{}" <<  platform_to_string(ctx.get_platform());
-    UMPIRE_ERROR(resource_error,
-                 oss.str());
+    oss << "Expected resources::Cuda, got resources::" << platform_to_string(ctx.get_platform());
+    UMPIRE_ERROR(resource_error, oss.str());
   }
   auto stream = device->get_stream();
 
@@ -44,10 +47,12 @@ camp::resources::EventProxy<camp::resources::Resource> CudaMemsetOperation::appl
 
   if (error != cudaSuccess) {
     std::ostringstream oss;
-    oss << "cudaMemsetAsync( src_ptr = {}, value = {}, length = {}, stream = {}) failed with error: {}" << src_ptr<< value<< length<<cudaGetErrorString(error)<< (void*)stream;
-    UMPIRE_ERROR(
-        runtime_error,
-        oss.str());
+    oss << "cudaMemsetAsync( src_ptr = " << src_ptr
+        << ", value = " << value
+        << ", length = " << length
+        << ", stream = " << (void*)stream
+        << ") failed with error: " << cudaGetErrorString(error);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   return camp::resources::EventProxy<camp::resources::Resource>{ctx};

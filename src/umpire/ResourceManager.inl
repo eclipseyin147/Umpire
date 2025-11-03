@@ -30,7 +30,9 @@ Allocator ResourceManager::makeAllocator(const std::string& name, Tracking track
 
   UMPIRE_LOG(Debug, "(name=\"" << name << "\")");
   if (isAllocator(name)) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Allocator with name \"{}\" is already registered", name));
+    std::ostringstream oss;
+    oss << "Allocator with name \"" << name << "\" is already registered";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   allocator = util::make_unique<Strategy>(name, getNextId(), std::forward<Args>(args)...);

@@ -9,6 +9,7 @@
 
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/error.hpp"
+#include <sstream>
 
 namespace umpire {
 namespace util {
@@ -164,7 +165,9 @@ void MemoryMap<V>::erase(Key ptr)
   if (m_last) {
     removeLast();
   } else {
-    UMPIRE_ERROR(runtime_error, fmt::format("Could not remove ptr: {}", ptr));
+    std::ostringstream oss;
+    oss << "Could not remove ptr: " << ptr;
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 }
 

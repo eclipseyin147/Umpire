@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <string>
+#include <sstream>
 
 #include "umpire/config.hpp"
 #include "umpire/util/error.hpp"
@@ -55,8 +56,11 @@ inline std::string resource_to_string(MemoryResourceType type)
       return "NO_OP";
     case Shared:
       return "SHARED";
-    default:
-      UMPIRE_ERROR(runtime_error, fmt::format("Unknown resource type: {}", static_cast<int>(type)));
+    default: {
+      std::ostringstream oss;
+      oss << "Unknown resource type: " << static_cast<int>(type);
+      UMPIRE_ERROR(runtime_error, oss.str());
+    }
   }
 
     //
@@ -90,7 +94,9 @@ inline MemoryResourceType string_to_resource(const std::string& resource)
   else if (resource == "SHARED")
     return MemoryResourceType::Shared;
   else {
-    UMPIRE_ERROR(runtime_error, fmt::format("Unknown resource name \"{}\"", resource));
+    std::ostringstream oss;
+    oss << "Unknown resource name \"" << resource << "\"";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   //
@@ -127,14 +133,18 @@ inline int resource_to_device_id(const std::string& resource)
 #if defined(UMPIRE_ENABLE_CUDA)
     cudaError_t err = cudaGetDevice(&device_id);
     if (err != cudaSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("cudaGetDevice failed with error: {}", cudaGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "cudaGetDevice failed with error: " << cudaGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
 #endif /* UMPIRE_ENABLE_CUDA */
 
 #if defined(UMPIRE_ENABLE_HIP)
     hipError_t err = hipGetDevice(&device_id);
     if (err != hipSuccess) {
-      UMPIRE_ERROR(runtime_error, fmt::format("hipGetDevice failed with error: {}", hipGetErrorString(err)));
+      std::ostringstream oss;
+      oss << "hipGetDevice failed with error: " << hipGetErrorString(err);
+      UMPIRE_ERROR(runtime_error, oss.str());
     }
 #endif /* UMPIRE_ENABLE_HIP */
   }

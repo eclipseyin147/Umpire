@@ -205,24 +205,30 @@ std::size_t get_device_memory_usage(int device_id)
   int current_device;
   cudaError_t err = cudaGetDevice(&current_device);
   if (err != cudaSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("cudaGetDevice failed with error: {}", cudaGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "cudaGetDevice failed with error: " << cudaGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   err = cudaSetDevice(device_id);
   if (err != cudaSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error,
-                 fmt::format("Error when trying to set CUDA Device: {}", cudaGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "Error when trying to set CUDA Device: " << cudaGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   err = cudaMemGetInfo(&mem_free, &mem_tot);
   if (err != cudaSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("cudaMemGetInfo failed with error: {}", cudaGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "cudaMemGetInfo failed with error: " << cudaGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   err = cudaSetDevice(current_device);
   if (err != cudaSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error,
-                 fmt::format("Error when trying to set CUDA Device: {}", cudaGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "Error when trying to set CUDA Device: " << cudaGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   return std::size_t{mem_tot - mem_free};
@@ -233,22 +239,30 @@ std::size_t get_device_memory_usage(int device_id)
   int current_device;
   hipError_t err = hipGetDevice(&current_device);
   if (err != hipSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("hipGetDevice failed with error: {}", hipGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "hipGetDevice failed with error: " << hipGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   err = hipSetDevice(device_id);
   if (err != hipSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("Error when trying to set HIP Device: {}", hipGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "Error when trying to set HIP Device: " << hipGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   err = hipMemGetInfo(&mem_free, &mem_tot);
   if (err != hipSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("hipMemGetInfo failed with error: {}", hipGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "hipMemGetInfo failed with error: " << hipGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   err = hipSetDevice(current_device);
   if (err != hipSuccess) {
-    UMPIRE_ERROR(umpire::runtime_error, fmt::format("Error when trying to set HIP Device: {}", hipGetErrorString(err)));
+    std::ostringstream oss;
+    oss << "Error when trying to set HIP Device: " << hipGetErrorString(err);
+    UMPIRE_ERROR(umpire::runtime_error, oss.str());
   }
 
   return std::size_t{mem_tot - mem_free};
@@ -291,8 +305,11 @@ void* find_pointer_from_name(Allocator allocator, const std::string& name)
 
   {
     if (ptr == nullptr) {
-      UMPIRE_ERROR(runtime_error,
-                   fmt::format("Allocator \"{}\" is not a Shared Memory Allocator", allocator.getName()));
+      {
+        std::ostringstream oss;
+        oss << "Allocator \"" << allocator.getName() << "\" is not a Shared Memory Allocator";
+        UMPIRE_ERROR(runtime_error, oss.str());
+      }
     }
   }
   return ptr;
@@ -382,7 +399,9 @@ camp::resources::Resource get_resource(Allocator a, void* ptr)
   strategy::ResourceAwarePool* rap{dynamic_cast<strategy::ResourceAwarePool*>(s)};
 
   if (!rap) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Allocator \"{}\" is not a ResourceAwarePool!", a.getName()));
+    std::ostringstream oss;
+    oss << "Allocator \"" << a.getName() << "\" is not a ResourceAwarePool!";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   return rap->getResource(ptr);
@@ -394,7 +413,9 @@ std::size_t get_num_pending(Allocator a)
   strategy::ResourceAwarePool* rap{dynamic_cast<strategy::ResourceAwarePool*>(s)};
 
   if (!rap) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Allocator \"{}\" is not a ResourceAwarePool!", a.getName()));
+    std::ostringstream oss;
+    oss << "Allocator \"" << a.getName() << "\" is not a ResourceAwarePool!";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   return rap->getNumPending();
@@ -424,8 +445,11 @@ void coalesce(Allocator a)
 {
   bool coalesced{try_coalesce(a)};
 
-  if (!coalesced)
-    UMPIRE_ERROR(runtime_error, fmt::format("Allocator \"{}\" could not be coalesced", a.getName()));
+  if (!coalesced) {
+    std::ostringstream oss;
+    oss << "Allocator \"" << a.getName() << "\" could not be coalesced";
+    UMPIRE_ERROR(runtime_error, oss.str());
+  }
 }
 
 } // end namespace umpire

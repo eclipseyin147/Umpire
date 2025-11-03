@@ -9,6 +9,7 @@
 #include "umpire/ResourceManager.hpp"
 
 #include <string>
+#include <sstream>
 
 namespace umpire {
 namespace strategy {
@@ -49,7 +50,9 @@ Inspector::deregisterAllocation(void* ptr, strategy::AllocationStrategy* s)
   } else {
     // Re-register the pointer and throw an error
     ResourceManager::getInstance().registerAllocation(ptr, {ptr, record.size, record.strategy, record.name});
-    UMPIRE_ERROR(runtime_error, fmt::format("{} was not allocated by {}", ptr, s->getName()));
+    std::ostringstream oss;
+    oss << ptr << " was not allocated by " << s->getName();
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   return record;

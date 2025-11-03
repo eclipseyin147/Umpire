@@ -11,6 +11,7 @@
 #include "umpire/strategy/mixins/AlignedAllocation.hpp"
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/memory_sanitizers.hpp"
+#include <sstream>
 
 namespace umpire {
 namespace strategy {
@@ -44,9 +45,9 @@ void* ResourceAwarePool::allocate(std::size_t bytes)
 {
   UMPIRE_LOG(
       Warning,
-      fmt::format("The ResourceAwarePool requires a Camp resource. See "
-                  "https://umpire.readthedocs.io/en/develop/sphinx/cookbook/resource_aware_pool.html for more info."
-                  "Calling allocate with the default Host resource..."));
+      std::string("The ResourceAwarePool requires a Camp resource. See ") +
+          "https://umpire.readthedocs.io/en/develop/sphinx/cookbook/resource_aware_pool.html for more info." +
+          "Calling allocate with the default Host resource...");
 
   return allocate_resource(bytes, camp::resources::Host().get_default());
 }
@@ -166,8 +167,12 @@ void ResourceAwarePool::deallocate(void* ptr, std::size_t size)
 {
   auto r = getResource(ptr);
 
-  UMPIRE_LOG(Warning, fmt::format("The ResourceAwarePool requires a Camp resource. Calling deallocate with: {}.",
-                                  camp::resources::to_string(r)));
+  {
+    std::ostringstream oss;
+    oss << "The ResourceAwarePool requires a Camp resource. Calling deallocate with: "
+        << camp::resources::to_string(r) << ".";
+    UMPIRE_LOG(Warning, oss.str());
+  }
 
   deallocate_resource(ptr, r, size);
 }
@@ -252,15 +257,16 @@ void ResourceAwarePool::deallocate_resource(void* ptr, camp::resources::Resource
   auto chunk = (*m_used_map.find(ptr)).second;
 
   if (chunk == nullptr) {
-    UMPIRE_ERROR(runtime_error, fmt::format("The chunk can't be found! Called deallocate with ptr: {}", ptr));
+    std::ostringstream oss;
+    oss << "The chunk can't be found! Called deallocate with ptr: " << ptr;
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   if (chunk->resource != r) {
-    UMPIRE_ERROR(
-        runtime_error,
-        fmt::format(
-            "Called deallocate with a different resource than what was expected. Called with: {} but expected: {}",
-            camp::resources::to_string(r), camp::resources::to_string(chunk->resource)));
+    std::ostringstream oss;
+    oss << "Called deallocate with a different resource than what was expected. Called with: "
+        << camp::resources::to_string(r) << " but expected: " << camp::resources::to_string(chunk->resource);
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   if (m_is_coalescing == false) {
@@ -410,18 +416,22 @@ camp::resources::Resource ResourceAwarePool::getResource(void* ptr) const
   for (auto pair = m_free_map.begin(); pair != m_free_map.end(); pair++) {
     auto chunk = (*pair).second;
     if (chunk->data == ptr) {
-      UMPIRE_LOG(
-          Warning,
-          fmt::format(
-              "Ptr {} corresponded to a free chunk in the ResourceAwarePool, so the resource may no longer be valid...",
-              ptr));
+      {
+        std::ostringstream oss;
+        oss << "Ptr " << ptr
+            << " corresponded to a free chunk in the ResourceAwarePool, so the resource may no longer be valid...";
+        UMPIRE_LOG(Warning, oss.str());
+      }
       return chunk->resource;
     }
   }
 
-  UMPIRE_LOG(Warning, fmt::format("The pointer {} does not seem to be associated with the ResourceAwarePool."
-                                  "Returning the default Host resource...",
-                                  ptr));
+  {
+    std::ostringstream oss;
+    oss << "The pointer " << ptr
+        << " does not seem to be associated with the ResourceAwarePool.Returning the default Host resource...";
+    UMPIRE_LOG(Warning, oss.str());
+  }
 
   return camp::resources::Host().get_default(); // Returning a default resource for the ResourceAwarePool
 }
@@ -514,8 +524,10 @@ PoolCoalesceHeuristic<ResourceAwarePool> ResourceAwarePool::blocks_releasable_hw
 PoolCoalesceHeuristic<ResourceAwarePool> ResourceAwarePool::percent_releasable(int percentage)
 {
   if (percentage < 0 || percentage > 100) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("Invalid percentage: {}, percentage must be an integer between 0 and 100", percentage));
+    std::ostringstream oss;
+    oss << "Invalid percentage: " << percentage
+        << ", percentage must be an integer between 0 and 100";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   if (percentage == 0) {
     return [=](const ResourceAwarePool& UMPIRE_UNUSED_ARG(pool)) { return 0; };
@@ -536,8 +548,10 @@ PoolCoalesceHeuristic<ResourceAwarePool> ResourceAwarePool::percent_releasable(i
 PoolCoalesceHeuristic<ResourceAwarePool> ResourceAwarePool::percent_releasable_hwm(int percentage)
 {
   if (percentage < 0 || percentage > 100) {
-    UMPIRE_ERROR(runtime_error,
-                 fmt::format("Invalid percentage: {}, percentage must be an integer between 0 and 100", percentage));
+    std::ostringstream oss;
+    oss << "Invalid percentage: " << percentage
+        << ", percentage must be an integer between 0 and 100";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   if (percentage == 0) {
     return [=](const ResourceAwarePool& UMPIRE_UNUSED_ARG(pool)) { return 0; };
