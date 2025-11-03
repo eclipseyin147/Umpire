@@ -65,7 +65,16 @@ if (UMPIRE_ENABLE_DEVICE_ALLOCATOR AND (UMPIRE_ENABLE_CUDA OR UMPIRE_ENABLE_HIP)
     SOURCES ${umpire_device_sources}
     DEPENDS_ON ${umpire_device_depends})
 
-  target_link_libraries(umpire_device PRIVATE umpire)
+  target_link_libraries(umpire_device PRIVATE
+          umpire
+          umpire_event        # event_store_recorder / recorder_factory 等
+          umpire_util         # util::flush_files 等
+          umpire_strategy     # mixins::AllocateNull / Inspector 等
+          umpire_resource
+          umpire_alloc
+          umpire_op
+          umpire_tpl_judy
+  )
 
   target_include_directories(
     umpire_device
