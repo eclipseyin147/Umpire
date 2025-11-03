@@ -7,6 +7,7 @@
 #include "umpire/device_allocator_helper.hpp"
 
 #include <string.h>
+#include <sstream>
 
 #include "umpire/ResourceManager.hpp"
 #if defined(UMPIRE_ENABLE_CUDA)
@@ -106,7 +107,9 @@ __host__ __device__ DeviceAllocator get_device_allocator(const char* name)
   int index = get_index(name);
 
   if (index == -1) {
-    UMPIRE_ERROR(runtime_error, fmt::format("No DeviceAllocator named \"{}\" was found", name));
+    std::ostringstream oss;
+    oss << "No DeviceAllocator named \"" << name << "\" was found";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
 #if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
@@ -121,10 +124,14 @@ __host__ __device__ DeviceAllocator get_device_allocator(int da_id)
   int id = convert_to_array_index(da_id);
 
   if (id < 0 || id > (UMPIRE_TOTAL_DEV_ALLOCS - 1)) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Invalid id given: {}", id));
+    std::ostringstream oss;
+    oss << "Invalid id given: " << id;
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
   if (!is_device_allocator(da_id)) {
-    UMPIRE_ERROR(runtime_error, fmt::format("No DeviceAllocator with id: {} was found", id));
+    std::ostringstream oss;
+    oss << "No DeviceAllocator with id: " << id << " was found";
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
 #if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
@@ -143,7 +150,9 @@ __host__ __device__ bool is_device_allocator(const char* name)
     UMPIRE_LOG(Warning, "No DeviceAllocator by the name " << name << " was found.");
     return false;
 #else
-    UMPIRE_ERROR(runtime_error, fmt::format("No DeviceAllocator by the name \"{}\" was found", name));
+    std::ostringstream oss;
+    oss << "No DeviceAllocator by the name \"" << name << "\" was found";
+    UMPIRE_ERROR(runtime_error, oss.str());
 #endif
   }
 
@@ -163,7 +172,9 @@ __host__ __device__ bool is_device_allocator(int da_id)
     UMPIRE_LOG(Warning, "Invalid ID given: " << id);
     return false;
 #else
-    UMPIRE_ERROR(runtime_error, fmt::format("Invalid id given: {}", id));
+    std::ostringstream oss;
+    oss << "Invalid id given: " << id;
+    UMPIRE_ERROR(runtime_error, oss.str());
 #endif
   }
 
@@ -182,7 +193,9 @@ __host__ DeviceAllocator make_device_allocator(Allocator allocator, size_t size,
   static int index{0};
 
   if (size <= 0) {
-    UMPIRE_ERROR(runtime_error, fmt::format("Invalid size passed to DeviceAllocator: ", size));
+    std::ostringstream oss;
+    oss << "Invalid size passed to DeviceAllocator: " << size;
+    UMPIRE_ERROR(runtime_error, oss.str());
   }
 
   if (UMPIRE_DEV_ALLOCS_h == nullptr) {
