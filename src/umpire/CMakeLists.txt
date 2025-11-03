@@ -65,6 +65,8 @@ if (UMPIRE_ENABLE_DEVICE_ALLOCATOR AND (UMPIRE_ENABLE_CUDA OR UMPIRE_ENABLE_HIP)
     SOURCES ${umpire_device_sources}
     DEPENDS_ON ${umpire_device_depends})
 
+  target_link_libraries(umpire_device PRIVATE umpire)
+
   target_include_directories(
     umpire_device
     PUBLIC
