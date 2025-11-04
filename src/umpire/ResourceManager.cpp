@@ -1050,9 +1050,13 @@ namespace umpire {
 template Allocator ResourceManager::makeAllocator<strategy::DynamicPoolList, true, Allocator&, std::size_t&, std::size_t&>(
     const std::string&, Allocator&, std::size_t&, std::size_t&);
 
-// QuickPool
+// QuickPool (3 args)
 template Allocator ResourceManager::makeAllocator<strategy::QuickPool, true, Allocator&, std::size_t&, std::size_t&>(
     const std::string&, Allocator&, std::size_t&, std::size_t&);
+
+// QuickPool (4 args)
+template Allocator ResourceManager::makeAllocator<strategy::QuickPool, true, Allocator&, std::size_t&, std::size_t&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&, std::size_t&, std::size_t&);
 
 // ResourceAwarePool
 template Allocator ResourceManager::makeAllocator<strategy::ResourceAwarePool, true, Allocator&, std::size_t&, std::size_t&>(
