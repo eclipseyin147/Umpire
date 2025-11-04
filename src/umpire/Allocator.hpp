@@ -15,6 +15,7 @@
 
 #include "camp/camp.hpp"
 #include "camp/resource.hpp"
+#include "umpire/config.hpp"
 #include "umpire/strategy/AllocationStrategy.hpp"
 #include "umpire/strategy/mixins/AllocateNull.hpp"
 #include "umpire/strategy/mixins/Inspector.hpp"
@@ -43,7 +44,7 @@ class GenericReallocateOperation;
  *
  * \see TypedAllocator
  */
-class Allocator : private strategy::mixins::Inspector, strategy::mixins::AllocateNull {
+class UMPIRE_EXPORT Allocator : private strategy::mixins::Inspector, strategy::mixins::AllocateNull {
   friend class ResourceManager;
   friend class ::AllocatorTest;
   friend class umpire::op::HostReallocateOperation;

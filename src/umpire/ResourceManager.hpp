@@ -19,6 +19,7 @@
 #include "umpire/Tracking.hpp"
 #include "umpire/resource/MemoryResourceTypes.hpp"
 #include "umpire/strategy/AllocationStrategy.hpp"
+#include "umpire/config.hpp"
 #include "umpire/util/AllocationMap.hpp"
 
 namespace umpire {
@@ -38,7 +39,7 @@ class AllocateNull;
 /*!
  * \brief
  */
-class ResourceManager {
+class UMPIRE_EXPORT ResourceManager {
  public:
   /*!
    * \brief
