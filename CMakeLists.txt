@@ -187,11 +187,16 @@ write_basic_package_version_file(
   ${PROJECT_BINARY_DIR}/umpire-config-version.cmake
   COMPATIBILITY SameMajorVersion)
 
-install(FILES 
+install(FILES
   "${PROJECT_BINARY_DIR}/umpire-config-version.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/umpire)
 
 install(EXPORT umpire-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/umpire)
+
+# Add a separate target for umpire_device to ensure it's built after all other libraries
+if (UMPIRE_ENABLE_DEVICE_ALLOCATOR AND (UMPIRE_ENABLE_CUDA OR UMPIRE_ENABLE_HIP))
+  add_subdirectory(src/umpire/device)
+endif()
 
 if (UMPIRE_ENABLE_TESTS)
   add_subdirectory(tests)

@@ -33,6 +33,7 @@ set (umpire_sources
   ResourceManager.cpp
   Umpire.cpp)
 
+# Build umpire_device after umpire to avoid circular dependencies
 if (UMPIRE_ENABLE_DEVICE_ALLOCATOR AND (UMPIRE_ENABLE_CUDA OR UMPIRE_ENABLE_HIP))
   set(umpire_device_headers
     DeviceAllocator.hpp
@@ -49,9 +50,7 @@ if (UMPIRE_ENABLE_DEVICE_ALLOCATOR AND (UMPIRE_ENABLE_CUDA OR UMPIRE_ENABLE_HIP)
     set_source_files_properties(device_allocator_helper.cpp
                               PROPERTIES
                               LANGUAGE CUDA)
-    set(umpire_device_depends camp cuda umpire)
   elseif (UMPIRE_ENABLE_HIP)
-    set(umpire_device_depends camp blt::hip umpire)
     set(hip_version_min "5.4.0")
 
     if (${hip_VERSION} VERSION_LESS ${hip_version_min})
@@ -59,38 +58,10 @@ if (UMPIRE_ENABLE_DEVICE_ALLOCATOR AND (UMPIRE_ENABLE_CUDA OR UMPIRE_ENABLE_HIP)
     endif ()
   endif()
 
-  blt_add_library(
-    NAME umpire_device
-    HEADERS ${umpire_device_headers}
-    SOURCES ${umpire_device_sources}
-    DEPENDS_ON ${umpire_device_depends})
-
-  target_include_directories(
-    umpire_device
-    PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-
-  install(TARGETS
-    umpire_device
-    EXPORT umpire-targets
-    RUNTIME DESTINATION lib
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
-
+  # Device headers need to be installed here, but the actual library will be built in a separate directory
   install(FILES
     ${umpire_device_headers}
     DESTINATION include/umpire)
-
-  if (UMPIRE_ENABLE_CUDA)
-    set_target_properties(umpire_device PROPERTIES
-      CUDA_SEPARABLE_COMPILATION On)
-  else ()
-    target_link_options(umpire_device PUBLIC -fgpu-rdc)
-    target_compile_options(umpire_device PUBLIC -fgpu-rdc)
-  endif ()
-
 endif()
 
 if (UMPIRE_ENABLE_SYCL)

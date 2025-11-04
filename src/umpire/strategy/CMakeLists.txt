@@ -102,7 +102,7 @@ blt_add_library(
   DEPENDS_ON ${umpire_strategy_depends}
   OBJECT TRUE)
 
-
+# Even with OBJECT libraries, ensure symbols are exported correctly
 set_target_properties(umpire_strategy PROPERTIES
         WINDOWS_EXPORT_ALL_SYMBOLS "YES")
 
