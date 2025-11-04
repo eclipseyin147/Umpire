@@ -21,6 +21,14 @@ cmake_minimum_required(VERSION 3.23)
 
 set(UMPIRE_VERSION_RC "")
 
+# Set MSVC runtime library to MultiThreadedDLL (/MD) for all targets
+# This ensures consistency across all libraries and prevents LNK2038 errors
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL" CACHE STRING "MSVC runtime library")
+  set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)  # Enable CMAKE_MSVC_RUNTIME_LIBRARY for all targets
+  message(STATUS "MSVC Runtime Library set to: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
+endif()
+
 
 include(cmake/SetupUmpireOptions.cmake)
 
