@@ -28,7 +28,7 @@
 #include "umpire/strategy/QuickPool.hpp"
 #include "umpire/strategy/ResourceAwarePool.hpp"
 #include "umpire/util/wrap_allocator.hpp"
-
+#include "umpire/event/event.hpp"
 #if !defined(_MSC_VER)
 #include <unistd.h>
 #endif

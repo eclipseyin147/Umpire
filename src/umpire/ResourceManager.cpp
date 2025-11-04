@@ -24,7 +24,7 @@
 #include "umpire/util/io.hpp"
 #include "umpire/util/make_unique.hpp"
 #include "umpire/util/wrap_allocator.hpp"
-
+#include "umpire/event/event.hpp"
 #if defined(UMPIRE_ENABLE_CUDA)
 #include <cuda_runtime_api.h>
 #if defined(UMPIRE_ENABLE_DEVICE_ALLOCATOR)
@@ -1020,3 +1020,88 @@ int ResourceManager::getNumDevices() const
 }
 
 } // end of namespace umpire
+
+// On Windows DLL builds, include the inline implementations here
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(UMPIRE_WIN_STATIC_BUILD)
+// The .inl file has its own namespace declaration
+#include "umpire/ResourceManager.inl"
+#endif
+
+// Explicit template instantiations for Windows DLL export
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(UMPIRE_WIN_STATIC_BUILD)
+#include "umpire/strategy/DynamicPoolList.hpp"
+#include "umpire/strategy/QuickPool.hpp"
+#include "umpire/strategy/ResourceAwarePool.hpp"
+#include "umpire/strategy/AllocationAdvisor.hpp"
+#include "umpire/strategy/NamedAllocationStrategy.hpp"
+#include "umpire/strategy/ThreadSafeAllocator.hpp"
+#include "umpire/strategy/FixedPool.hpp"
+#include "umpire/strategy/AlignedAllocator.hpp"
+#include "umpire/strategy/SizeLimiter.hpp"
+#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
+#include "umpire/strategy/SlotPool.hpp"
+#include "umpire/strategy/NamingShim.hpp"
+#include "umpire/strategy/MixedPool.hpp"
+#include "umpire/strategy/AllocationPrefetcher.hpp"
+
+namespace umpire {
+
+// DynamicPoolList
+template Allocator ResourceManager::makeAllocator<strategy::DynamicPoolList, true, Allocator&, std::size_t&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&, std::size_t&);
+
+// QuickPool
+template Allocator ResourceManager::makeAllocator<strategy::QuickPool, true, Allocator&, std::size_t&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&, std::size_t&);
+
+// ResourceAwarePool
+template Allocator ResourceManager::makeAllocator<strategy::ResourceAwarePool, true, Allocator&, std::size_t&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&, std::size_t&);
+
+// AllocationAdvisor
+template Allocator ResourceManager::makeAllocator<strategy::AllocationAdvisor, true, Allocator&, const std::string&, int&>(
+    const std::string&, Allocator&, const std::string&, int&);
+
+// NamedAllocationStrategy
+template Allocator ResourceManager::makeAllocator<strategy::NamedAllocationStrategy, true, Allocator&>(
+    const std::string&, Allocator&);
+
+// ThreadSafeAllocator
+template Allocator ResourceManager::makeAllocator<strategy::ThreadSafeAllocator, true, Allocator&>(
+    const std::string&, Allocator&);
+
+// FixedPool
+template Allocator ResourceManager::makeAllocator<strategy::FixedPool, true, Allocator&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&);
+
+// AlignedAllocator
+template Allocator ResourceManager::makeAllocator<strategy::AlignedAllocator, true, Allocator&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&);
+
+// SizeLimiter
+template Allocator ResourceManager::makeAllocator<strategy::SizeLimiter, true, Allocator&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&);
+
+// MonotonicAllocationStrategy
+template Allocator ResourceManager::makeAllocator<strategy::MonotonicAllocationStrategy, true, Allocator&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&);
+
+// SlotPool
+template Allocator ResourceManager::makeAllocator<strategy::SlotPool, true, Allocator&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&);
+
+// NamingShim
+template Allocator ResourceManager::makeAllocator<strategy::NamingShim, true, Allocator&>(
+    const std::string&, Allocator&);
+
+// MixedPool
+template Allocator ResourceManager::makeAllocator<strategy::MixedPool, true, Allocator&, std::size_t&, std::size_t&, std::size_t&, std::size_t&, std::size_t&, std::size_t&, std::size_t&>(
+    const std::string&, Allocator&, std::size_t&, std::size_t&, std::size_t&, std::size_t&, std::size_t&, std::size_t&, std::size_t&);
+
+// AllocationPrefetcher
+template Allocator ResourceManager::makeAllocator<strategy::AllocationPrefetcher, true, Allocator&, int&>(
+    const std::string&, Allocator&, int&);
+
+} // end namespace umpire
+
+#endif // Windows DLL

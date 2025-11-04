@@ -22,7 +22,19 @@ namespace umpire {
 class ResourceManager;
 class Allocator;
 
+// Forward declare error types
+class runtime_error;
+class out_of_memory_error;
+class unknown_pointer_error;
+class resource_error;
+
 namespace strategy {
+
+// Import error types from parent umpire namespace for convenience
+using umpire::runtime_error;
+using umpire::out_of_memory_error;
+using umpire::unknown_pointer_error;
+using umpire::resource_error;
 
 /*!
  * \brief AllocationStrategy provides a unified interface to all classes that

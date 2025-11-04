@@ -9,6 +9,7 @@
 #include <mutex>
 
 #include "umpire/ResourceManager.hpp"
+#include "umpire/event/event.hpp"
 #include "umpire/strategy/ThreadSafeAllocator.hpp"
 #include "umpire/util/Macros.hpp"
 
@@ -109,3 +110,10 @@ std::ostream& operator<<(std::ostream& os, const Allocator& allocator)
 }
 
 } // end of namespace umpire
+
+// On Windows DLL builds, include the inline implementations here
+// so they get compiled into the DLL instead of being inlined at call sites
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(UMPIRE_WIN_STATIC_BUILD)
+// The .inl file has its own namespace declaration
+#include "umpire/Allocator.inl"
+#endif

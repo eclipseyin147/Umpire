@@ -364,6 +364,9 @@ class UMPIRE_EXPORT ResourceManager {
 
 } // end namespace umpire
 
+// Only include inline implementations when not exporting from DLL
+#if !((defined(_WIN32) || defined(_WIN64)) && !defined(UMPIRE_WIN_STATIC_BUILD))
 #include "umpire/ResourceManager.inl"
+#endif
 
 #endif // UMPIRE_ResourceManager_HPP

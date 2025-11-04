@@ -51,21 +51,12 @@ blt_add_library(
 # Fix MSVC runtime conflicts
 if (MSVC)
   set_target_properties(umpire_device PROPERTIES
-    WINDOWS_EXPORT_ALL_SYMBOLS "YES"
     MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 
   target_link_options(umpire_device PRIVATE "/NODEFAULTLIB:LIBCMT")
 
-  # Direct object file linking for Windows to resolve missing symbols
-  target_link_libraries(umpire_device PRIVATE
-    "${CMAKE_BINARY_DIR}/src/umpire/strategy/CMakeFiles/umpire_strategy.dir/AllocationStrategy.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/strategy/CMakeFiles/umpire_strategy.dir/FixedPool.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/strategy/CMakeFiles/umpire_strategy.dir/ThreadSafeAllocator.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/strategy/CMakeFiles/umpire_strategy.dir/mixins/AllocateNull.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/strategy/CMakeFiles/umpire_strategy.dir/mixins/Inspector.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/CMakeFiles/umpire.dir/ResourceManager.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/CMakeFiles/umpire.dir/Allocator.cpp.obj"
-    "${CMAKE_BINARY_DIR}/src/umpire/CMakeFiles/umpire.dir/Umpire.cpp.obj")
+  # Note: Removed direct object file linking - umpire_device already depends on umpire library
+  # which exports all necessary symbols via UMPIRE_EXPORT macros
 else()
   set_target_properties(umpire_device PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS "YES")
 endif()

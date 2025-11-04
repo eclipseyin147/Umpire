@@ -65,11 +65,11 @@ class UMPIRE_EXPORT Allocator : private strategy::mixins::Inspector, strategy::m
    *
    * \return Pointer to start of the allocation.
    */
-  inline void* allocate(std::size_t bytes);
+  void* allocate(std::size_t bytes);
 
-  inline void* allocate(std::size_t bytes, camp::resources::Resource const& r);
+  void* allocate(std::size_t bytes, camp::resources::Resource const& r);
 
-  inline void* allocate(const std::string& name, std::size_t bytes);
+  void* allocate(const std::string& name, std::size_t bytes);
 
   /*!
    * \brief Free the memory at ptr.
@@ -82,9 +82,9 @@ class UMPIRE_EXPORT Allocator : private strategy::mixins::Inspector, strategy::m
    *
    * \param ptr Pointer to free (If nullptr, it will be ignored.)
    */
-  inline void deallocate(void* ptr);
+  void deallocate(void* ptr);
 
-  inline void deallocate(void* ptr, camp::resources::Resource const& r);
+  void deallocate(void* ptr, camp::resources::Resource const& r);
 
   /*!
    * \brief Release any and all unused memory held by this Allocator.
@@ -241,6 +241,10 @@ inline std::string to_string(const Allocator& a)
 
 } // end of namespace umpire
 
+// Only include inline implementations when not exporting from DLL
+// When building umpire.dll (umpire_EXPORTS is defined), implementations go in .cpp
+#if !((defined(_WIN32) || defined(_WIN64)) && !defined(UMPIRE_WIN_STATIC_BUILD))
 #include "umpire/Allocator.inl"
+#endif
 
 #endif // UMPIRE_Allocator_HPP

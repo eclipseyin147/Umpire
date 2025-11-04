@@ -7,6 +7,7 @@
 #ifndef UMPIRE_Inspector_HPP
 #define UMPIRE_Inspector_HPP
 
+#include "umpire/config.hpp"
 #include "umpire/util/AllocationRecord.hpp"
 
 #include <memory>
@@ -19,7 +20,7 @@ class AllocationStrategy;
 
 namespace mixins {
 
-class Inspector
+class UMPIRE_EXPORT Inspector
 {
   public:
     Inspector() = default;

@@ -7,6 +7,7 @@
 #include "umpire/strategy/AlignedAllocator.hpp"
 
 #include "umpire/util/Macros.hpp"
+#include "umpire/util/error.hpp"
 
 namespace umpire {
 namespace strategy {

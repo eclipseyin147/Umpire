@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "umpire/util/Macros.hpp"
+#include "umpire/util/error.hpp"
 #include "umpire/util/find_first_set.hpp"
 
 #if !defined(_MSC_VER)

@@ -12,6 +12,8 @@
 #include "umpire/util/Macros.hpp"
 #include "umpire/util/memory_sanitizers.hpp"
 #include <sstream>
+#include "umpire/event/event.hpp"
+#include "umpire/util/error.hpp"
 
 namespace umpire {
 namespace strategy {

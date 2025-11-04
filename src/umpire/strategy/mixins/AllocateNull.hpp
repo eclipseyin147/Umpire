@@ -7,6 +7,7 @@
 #ifndef UMPIRE_Zeroer_HPP
 #define UMPIRE_Zeroer_HPP
 
+#include "umpire/config.hpp"
 
 namespace umpire {
 namespace strategy {
@@ -15,7 +16,7 @@ class FixedPool;
 
 namespace mixins {
 
-class AllocateNull
+class UMPIRE_EXPORT AllocateNull
 {
   public:
     AllocateNull();
