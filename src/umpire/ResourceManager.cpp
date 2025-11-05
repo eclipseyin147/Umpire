@@ -1046,9 +1046,13 @@ int ResourceManager::getNumDevices() const
 
 namespace umpire {
 
-// DynamicPoolList
+// DynamicPoolList (3 args)
 template Allocator ResourceManager::makeAllocator<strategy::DynamicPoolList, true, Allocator&, std::size_t&, std::size_t&>(
     const std::string&, Allocator&, std::size_t&, std::size_t&);
+
+// DynamicPoolList (4 args with heuristic)
+template Allocator ResourceManager::makeAllocator<strategy::DynamicPoolList, true, Allocator&, std::size_t&, std::size_t&, std::size_t&, std::function<std::size_t(const strategy::DynamicPoolList&)>&>(
+    const std::string&, Allocator&, std::size_t&, std::size_t&, std::size_t&, std::function<std::size_t(const strategy::DynamicPoolList&)>&);
 
 // QuickPool (3 args)
 template Allocator ResourceManager::makeAllocator<strategy::QuickPool, true, Allocator&, std::size_t&, std::size_t&>(
